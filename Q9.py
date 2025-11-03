@@ -1,0 +1,33 @@
+N = 8
+
+def print_board(board):
+    for row in board:
+        print(" ".join("Q" if col else "." for col in row))
+    print()
+
+def is_safe(board, row, col):
+    for i in range(col):
+        if board[row][i]:
+            return False
+    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+        if board[i][j]:
+            return False
+    for i, j in zip(range(row, N, 1), range(col, -1, -1)):
+        if board[i][j]:
+            return False
+    return True
+
+def solve_queens(board, col):
+    if col >= N:
+        print_board(board)
+        return True
+    res = False
+    for i in range(N):
+        if is_safe(board, i, col):
+            board[i][col] = 1
+            res = solve_queens(board, col + 1) or res
+            board[i][col] = 0
+    return res
+
+board = [[0]*N for _ in range(N)]
+solve_queens(board, 0)
