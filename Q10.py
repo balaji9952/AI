@@ -1,24 +1,31 @@
-from itertools import permutations
+from queue import PriorityQueue
 
-def travelling_salesman(graph, start):
-    vertices = list(graph.keys())
-    vertices.remove(start)
-    min_path = float('inf')
-    for perm in permutations(vertices):
-        current_cost = 0
-        k = start
-        for j in perm:
-            current_cost += graph[k][j]
-            k = j
-        current_cost += graph[k][start]
-        min_path = min(min_path, current_cost)
-    return min_path
+def memory_bounded_a_star(graph, start, goal, h):
+    open_set = PriorityQueue()
+    open_set.put((h[start], start))
+    g_score = {node: float('inf') for node in graph}
+    g_score[start] = 0
+    while not open_set.empty():
+        _, current = open_set.get()
+        if current == goal:
+            return g_score[current]
+        for neighbor, cost in graph[current]:
+            temp_g = g_score[current] + cost
+            if temp_g < g_score.get(neighbor, float('inf')):
+                g_score[neighbor] = temp_g
+                open_set.put((temp_g + h[neighbor], neighbor))
+    return None
 
 graph = {
-    0: {1: 10, 2: 15, 3: 20},
-    1: {0: 10, 2: 35, 3: 25},
-    2: {0: 15, 1: 35, 3: 30},
-    3: {0: 20, 1: 25, 2: 30}
+    'A': [('B', 2), ('C', 3)],
+    'B': [('D', 4), ('E', 2)],
+    'C': [('F', 5)],
+    'D': [('G', 1)],
+    'E': [('G', 3)],
+    'F': [('G', 2)],
+    'G': []
 }
 
-print("Minimum cost:", travelling_salesman(graph, 0))
+h = {'A': 7, 'B': 6, 'C': 5, 'D': 4, 'E': 2, 'F': 1, 'G': 0}
+cost = memory_bounded_a_star(graph, 'A', 'G', h)
+print("Best Path Cost:", cost)
